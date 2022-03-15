@@ -53,15 +53,8 @@ def insert {
   }
   preparedStmt.close
 }
-  def delete: Unit ={
-    val preparedStmt: PreparedStatement = conn.prepareStatement("TRUNCATE ability")
-    preparedStmt.execute()
-    conn.close()
-    preparedStmt.close
-  }
-  def reset: Unit ={
-    stmt.executeUpdate(s"UPDATE weapon SET TotalDMG = null  WHERE MonstersID < 6;")
-  }
+
+
 def executeDML(query : String) : Option[Boolean] = {
     try {
       stmt = conn.createStatement()
@@ -80,6 +73,14 @@ def executeDML(query : String) : Option[Boolean] = {
         None;
       }
     }
+  }
+
+
+  def delete: Unit ={
+    val preparedStmt: PreparedStatement = conn.prepareStatement("TRUNCATE ability")
+    preparedStmt.execute()
+    conn.close()
+    preparedStmt.close
   }
 def monsterReset: Unit ={
   stmt.executeUpdate(s"UPDATE monsters SET MonstersHP = 50  WHERE MonstersID= 1")
@@ -114,7 +115,7 @@ def monsterReset: Unit ={
         println("____________________________________________________________________")
         println("You decide to turn back and leave the dungeon")
         delete
-        reset
+
         break
       }
       println("You engaged into battle against a " + monsters.head)
@@ -150,22 +151,24 @@ def monsterReset: Unit ={
 
           val damageDealt = rnd.nextInt(attack)
           val damageTaken = rnd.nextInt(p)
-          println("The " + monsters.head + " uses its ability " + monstersAbility.head)
-          println(s"You've taken $damageTaken DMG")
           println("You strike the " + monsters.head + " dealing " + damageDealt + " DMG")
           d -= damageDealt
-          health -= damageTaken
-          if (health < 0) {
-            println("____________________________________________________________________")
-            println("You've taken too much damage. You quickly got out of there and ran out of the dungeon")
-            delete
-            reset
-            break
-          }
-          else if (d > 0) {
+
+          if (d > 0) {
             println("The " + monsters.head + " has " + d + " HP")
+            println("The " + monsters.head + " uses its ability " + monstersAbility.head)
+            health -= damageTaken
+            println(s"You've taken $damageTaken DMG")
+
 
             stmt.executeUpdate(s"UPDATE monsters SET MonstersHP = $d  WHERE MonstersID= $id")
+            if (health <= 0) {
+              println("____________________________________________________________________")
+              println("You've taken too much damage. You quickly got out of there and ran out of the dungeon")
+              delete
+
+              break
+            }
           }
           else if (d <= 0) {
             stmt.executeUpdate(s"UPDATE monsters SET MonstersHP = 0  WHERE MonstersID= $id")
@@ -211,7 +214,7 @@ def monsterReset: Unit ={
               println("____________________________________________________________________")
               println("You've taken too much damage. You quickly got out of there and ran out of the dungeon")
               delete
-              reset
+
               break
 
             }
@@ -240,7 +243,7 @@ def monsterReset: Unit ={
           println("____________________________________________________________________")
           println("You quickly ran out of the dungeon")
           delete
-          reset
+
           break
         }
 
@@ -262,7 +265,7 @@ def monsterReset: Unit ={
     val name = readLine("Type in your name: \n")
     print(name)
     monsterReset
-    reset
+
     delete
 
   }
