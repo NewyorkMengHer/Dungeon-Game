@@ -54,7 +54,7 @@ a json file and persisted to MYSQL. User interaction will be through the Command
 ![](Dungeon%20Images/5.PNG)
 
 - There are four potions given at the start of the dungeon. Player can choose to consume one in exchange for 100 health
-- If player's hp is higher than 300. It would not consume a potion as the player would only need it if they are low in health
+- If player's hp is higher than 300. It would not consume a potion as the player would only need it in dire situation
 
 ![](Dungeon%20Images/6.PNG)
 
