@@ -63,3 +63,7 @@ a json file and persisted to MYSQL. User interaction will be through the Command
 
 ![](Dungeon%20Images/7.PNG)
  
+ - This is an Entity Relationship Diagram(ERD) of the different tables created for Project 0. 
+ - The monsters data table has a one to one relationship to both weapons and abilities as each monster can only have at most one weapon and one ability
+ 
+ ![](8.PNG)
