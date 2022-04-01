@@ -38,8 +38,8 @@ a json file and persisted to MYSQL. User interaction will be through the Command
 ![](Dungeon%20Images/1.PNG)
 
 - In the turn base game, the player would always have the first move and the attacks dealt for both monsters and player are randomized between a set of numbers
-- From the series of choices the player can choose one of the followings
-- After defeating the monster, a prompt would be presented allowing the player to choose to leave or continue in the dungeon
+- From the series of choices the player can choose one of the followings: (Attack, Ability, Heal, Run)
+- After defeating the monster, a prompt is presented allowing the player to leave or continue in the dungeon
 
 ![](Dungeon%20Images/2.PNG)
 
