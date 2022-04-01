@@ -12,6 +12,7 @@ a json file and persisted to MYSQL. User interaction will be through the Command
 ## Features
 - Random number generator(RNG) attacks
 - List of unique monsters (Skeleton, Minotaur, Slime, etc.)
+- Chance of monsters with bonus stats
 - Different abilities
 - Chance of landing a crit attack
 - Health potions
