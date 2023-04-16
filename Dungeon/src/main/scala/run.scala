@@ -1,6 +1,6 @@
 
 
-import scala.util.control.Breaks.break
+import scala.util.control.Breaks.{break, breakable}
 import scala.io.StdIn._
 import java.sql.{Connection, DriverManager, PreparedStatement, ResultSet, SQLException, SQLIntegrityConstraintViolationException, Statement}
 import java.io.IOException
@@ -95,7 +95,7 @@ def monsterReset: Unit ={
     val monsters = ArrayBuffer("Skeleton", "Slime", "Spider", "Minotaur", "Guardian")
     val monstersHp = ArrayBuffer[Int](50, 30, 75, 120, 200)
     var monstersId = ArrayBuffer[Int](1, 2, 3, 4, 5)
-    var monstersDmg = ArrayBuffer[Int](50,30,80,100,150)
+    var monstersDmg = ArrayBuffer[Int](50, 30, 80, 100, 150)
     var monstersAbility = ArrayBuffer("Multi Shot", "Tackle", "Poison Spit", "Raging Bull", "Judgement")
 
     monsterReset
@@ -105,171 +105,172 @@ def monsterReset: Unit ={
     println("Welcome to the Dungeon!")
 
 
-    for (i <- 0 until monsters.length) {
-      println("____________________________________________________________________")
-      val continue = readLine("Do you wish to continue? \n1. Yes \n2. No, let's turn back \n")
-      if (continue.toLong == 1) {
+    breakable {
+      for (i <- 0 until monsters.length) {
         println("____________________________________________________________________")
-        println("You chose to continue into the dungeon")
-      } else {
-        println("____________________________________________________________________")
-        println("You decide to turn back and leave the dungeon")
-        delete
+        val continue = readLine("Do you wish to continue? \n1. Yes \n2. No, let's turn back \n")
+        if (continue.toLong == 1) {
+          println("____________________________________________________________________")
+          println("You chose to continue into the dungeon")
+        } else {
+          println("____________________________________________________________________")
+          println("You decide to turn back and leave the dungeon")
+          delete
 
-        break
-      }
-      println("You engaged into battle against a " + monsters.head)
-      var d = monstersHp.head
-      var id = monstersId.head
-      var p = monstersDmg.head
+          break
+        }
+        println("You engaged into battle against a " + monsters.head)
+        var d = monstersHp.head
+        var id = monstersId.head
+        var p = monstersDmg.head
 
-        if(monsters.head == "Skeleton"){
+        if (monsters.head == "Skeleton") {
           println("The Skeleton is equipped with a Bow. It gains +12 DMG")
           p += 12
           executeDML(s"UPDATE weapon SET TotalDMG = $p WHERE MonstersID = 1")
         }
-        else if(monsters.head == "Minotaur"){
+        else if (monsters.head == "Minotaur") {
           println("The Minotaur is equipped with an Axe. It gains +20 DMG")
           p += 18
           executeDML(s"UPDATE weapon SET TotalDMG = $p WHERE MonstersID = 4")
         }
-        else if(monsters.head == "Guardian"){
+        else if (monsters.head == "Guardian") {
           println("The Guardian is equipped with a Giant Sword. It gains +30 DMG")
           p += 26
           executeDML(s"UPDATE weapon SET TotalDMG = $p WHERE MonstersID = 5")
         }
 
 
-      while (d > 0) {
-        println("____________________________________________________________________")
-        println("Your HP: " + health)
-        println(monsters.head + "'s HP: " + d)
-        val move = readLine("Choose your next move \n1. Attack \n2. Use ability \n3. Heal \n4. Run \n")
-
-        if (move.toLong == 1) {
+        while (d > 0) {
           println("____________________________________________________________________")
+          println("Your HP: " + health)
+          println(monsters.head + "'s HP: " + d)
+          val move = readLine("Choose your next move \n1. Attack \n2. Use ability \n3. Heal \n4. Run \n")
 
-          val damageDealt = rnd.nextInt(attack)
-          val damageTaken = rnd.nextInt(p)
-          println("You strike the " + monsters.head + " dealing " + damageDealt + " DMG")
-          d -= damageDealt
+          if (move.toLong == 1) {
+            println("____________________________________________________________________")
 
-          if (d > 0) {
-            println("The " + monsters.head + " has " + d + " HP")
-            println("The " + monsters.head + " uses its ability " + monstersAbility.head)
-            health -= damageTaken
-            println(s"You've taken $damageTaken DMG")
+            val damageDealt = rnd.nextInt(attack)
+            val damageTaken = rnd.nextInt(p)
+            println("You strike the " + monsters.head + " dealing " + damageDealt + " DMG")
+            d -= damageDealt
 
-
-            stmt.executeUpdate(s"UPDATE monsters SET MonstersHP = $d  WHERE MonstersID= $id")
-            if (health <= 0) {
-              println("____________________________________________________________________")
-              println("You've taken too much damage. You quickly got out of there and ran out of the dungeon")
-              delete
-
-              break
-            }
-          }
-          else if (d <= 0) {
-            stmt.executeUpdate(s"UPDATE monsters SET MonstersHP = 0  WHERE MonstersID= $id")
-          }
-
-
-        }
-        else if (move.toLong == 2) {
-          println("____________________________________________________________________")
-          println("You activated your ability! Multi Slash!")
-
-          val multiSlash = 80
-          if (rnd.nextInt(20) < 10) {
-            println("...")
-            Thread.sleep(1000)
-            println("...")
-            Thread.sleep(1000)
-            println("...")
-            Thread.sleep(1000)
-            println("You landed a critical hit! You've hit the " + monsters.head + " for " + multiSlash + " DMG!")
-            d -= multiSlash
             if (d > 0) {
               println("The " + monsters.head + " has " + d + " HP")
+              println("The " + monsters.head + " uses its ability " + monstersAbility.head)
+              health -= damageTaken
+              println(s"You've taken $damageTaken DMG")
+
 
               stmt.executeUpdate(s"UPDATE monsters SET MonstersHP = $d  WHERE MonstersID= $id")
+              if (health <= 0) {
+                println("____________________________________________________________________")
+                println("You've taken too much damage. You quickly got out of there and ran out of the dungeon")
+                delete
+
+                break
+              }
             }
             else if (d <= 0) {
               stmt.executeUpdate(s"UPDATE monsters SET MonstersHP = 0  WHERE MonstersID= $id")
             }
-          } else {
-            println("...")
-            Thread.sleep(1000)
-            println("...")
-            Thread.sleep(1000)
-            println("...")
-            Thread.sleep(1000)
-            println("Your ability missed the target")
-            val damageTaken = rnd.nextInt(p)
-            health -= damageTaken
-            println("The " + monsters.head + " uses its ability " + monstersAbility.head)
-            println(s"You've taken $damageTaken DMG")
-            if (health < 0) {
-              println("____________________________________________________________________")
-              println("You've taken too much damage. You quickly got out of there and ran out of the dungeon")
-              delete
 
-              break
 
-            }
           }
-
-        }
-        else if (move.toLong == 3) {
-
-          if (potions > 0 & health > 299) {
+          else if (move.toLong == 2) {
             println("____________________________________________________________________")
-            println("You're still healthy. Your player doesn't need heal")
+            println("You activated your ability! Multi Slash!")
 
-          } else if (potions > 0 & health < 300) {
-            println("____________________________________________________________________")
-            val heal = 100
-            health += heal
-            println(s"You drank a potion to heal yourself\nYou healed yourself for $heal HP \nYou have $potions potions left")
-            potions -= 1
+            val multiSlash = 80
+            if (rnd.nextInt(20) < 10) {
+              println("...")
+              Thread.sleep(1000)
+              println("...")
+              Thread.sleep(1000)
+              println("...")
+              Thread.sleep(1000)
+              println("You landed a critical hit! You've hit the " + monsters.head + " for " + multiSlash + " DMG!")
+              d -= multiSlash
+              if (d > 0) {
+                println("The " + monsters.head + " has " + d + " HP")
+
+                stmt.executeUpdate(s"UPDATE monsters SET MonstersHP = $d  WHERE MonstersID= $id")
+              }
+              else if (d <= 0) {
+                stmt.executeUpdate(s"UPDATE monsters SET MonstersHP = 0  WHERE MonstersID= $id")
+              }
+            } else {
+              println("...")
+              Thread.sleep(1000)
+              println("...")
+              Thread.sleep(1000)
+              println("...")
+              Thread.sleep(1000)
+              println("Your ability missed the target")
+              val damageTaken = rnd.nextInt(p)
+              health -= damageTaken
+              println("The " + monsters.head + " uses its ability " + monstersAbility.head)
+              println(s"You've taken $damageTaken DMG")
+              if (health < 0) {
+                println("____________________________________________________________________")
+                println("You've taken too much damage. You quickly got out of there and ran out of the dungeon")
+                delete
+
+                break
+
+              }
+            }
+
+          }
+          else if (move.toLong == 3) {
+
+            if (potions > 0 & health > 299) {
+              println("____________________________________________________________________")
+              println("You're still healthy. Your player doesn't need heal")
+
+            } else if (potions > 0 & health < 300) {
+              println("____________________________________________________________________")
+              val heal = 100
+              health += heal
+              println(s"You drank a potion to heal yourself\nYou healed yourself for $heal HP \nYou have $potions potions left")
+              potions -= 1
+            }
+            else {
+              println("You've ran out of potions")
+            }
+
           }
           else {
-            println("You've ran out of potions")
+            println("____________________________________________________________________")
+            println("You quickly ran out of the dungeon")
+            delete
+
+            break
           }
 
-        }
-        else {
-          println("____________________________________________________________________")
-          println("You quickly ran out of the dungeon")
-          delete
 
-          break
         }
 
-
+        println("____________________________________________________________________")
+        println("You defeated the " + monsters.head)
+        monsters -= monsters.head
+        monstersHp -= monstersHp.head
+        monstersId -= monstersId.head
+        monstersAbility -= monstersAbility.head
+        monstersDmg -= monstersDmg.head
       }
-
       println("____________________________________________________________________")
-      println("You defeated the " + monsters.head)
-      monsters -= monsters.head
-      monstersHp -= monstersHp.head
-      monstersId -= monstersId.head
-      monstersAbility -= monstersAbility.head
-      monstersDmg -= monstersDmg.head
+      println("CONGRATULATIONS!")
+      println(raw"You've defeated the dungeon and get the honor of having your name on the 'CHAMPION STONE'")
+
+      val name = readLine("Type in your name: \n")
+      print(name)
+
+
+      delete
+
     }
-    println("____________________________________________________________________")
-    println("CONGRATULATIONS!")
-    println(raw"You've defeated the dungeon and get the honor of having your name on the 'CHAMPION STONE'")
-
-    val name = readLine("Type in your name: \n")
-    print(name)
-    monsterReset
-
-    delete
 
   }
-
-
 }
 
